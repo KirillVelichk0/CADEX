@@ -9,15 +9,16 @@
 #include <random>
 #include <vector>
 int main(int argc, char *argv[]) {
-  int N = 1000;
+  int N = 10;
   std::vector<std::shared_ptr<Curve>> curves(N);
 #pragma omp parallel
   {
 #pragma omp for
     {
       for (int i = 0; i < N; i++) {
-        std::int64_t seed =
-            std::chrono::steady_clock::now().time_since_epoch().count();
+        std::int64_t seed = std::chrono::high_resolution_clock::now()
+                                .time_since_epoch()
+                                .count();
         std::mt19937_64 generator(seed);
         std::uniform_int_distribution curveDistr(1, 3);
         auto curveId = curveDistr(generator);
@@ -25,13 +26,13 @@ int main(int argc, char *argv[]) {
 
         std::shared_ptr<Curve> curve;
         switch (curveId) {
-        case 0:
+        case 1:
           curve = CreateCircle(radiusDistr(generator));
           break;
-        case 1:
+        case 2:
           curve = CreateEllipse(radiusDistr(generator), radiusDistr(generator));
           break;
-        case 2: {
+        case 3: {
           std::uniform_real_distribution<> stepDistr(-1000, 1000);
           curve = CreateHelix(radiusDistr(generator), stepDistr(generator));
         } break;
