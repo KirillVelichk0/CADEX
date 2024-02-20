@@ -2,14 +2,23 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <execution>
 #include <iostream>
 #include <memory>
 #include <omp.h>
 #include <random>
+#include <sstream>
 #include <vector>
 int main(int argc, char *argv[]) {
   int N = 10;
+  if (argc == 2) {
+    std::istringstream ss(argv[1]);
+    ss >> N;
+    if (N <= 0 || ss.bad()) {
+      std::exit(1);
+    }
+  }
   std::vector<std::shared_ptr<Curve>> curves(N);
 #pragma omp parallel
   {
@@ -74,12 +83,13 @@ int main(int argc, char *argv[]) {
   //! Just use C++ 17 feature
   std::sort(std::execution::par_unseq, circles.begin(), circles.end(),
             [](auto l, auto r) { return l->GetR() < r->GetR(); });
-  std::int64_t sum = 0;
+  double sum = 0;
 #pragma omp parallel reduction(+ : sum)
   {
 #pragma omp for
     for (int i = 0; i < circles.size(); ++i)
       sum += circles[i]->GetR();
   }
+
   return 0;
 }

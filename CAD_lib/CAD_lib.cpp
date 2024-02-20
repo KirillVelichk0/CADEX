@@ -1,5 +1,6 @@
 #include "CAD_lib.h"
 #include <cmath>
+#include <limits>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -51,14 +52,15 @@ Helix::Derivative Helix::GetFirstDerivative() {
   return {xDerComp, yDerComp, zDerComp};
 }
 std::unique_ptr<Curve> CreateCircle(const double r) {
-  if (r <= 0) {
+  if (std::abs(r) < std::numeric_limits<double>::epsilon() || r < 0) {
     throw std::invalid_argument("Radius must be positive. Cur radius value: " +
                                 std::to_string(r));
   }
   return std::make_unique<Circle>(r);
 }
 std::unique_ptr<Curve> CreateEllipse(const double rX, const double rY) {
-  if (rX <= 0 || rY <= 0) {
+  if (std::abs(rX) < std::numeric_limits<double>::epsilon() || rX < 0 ||
+      std::abs(rY) < std::numeric_limits<double>::epsilon() || rY < 0) {
     throw std::invalid_argument(
         "Radiuses must be positive. Cur x radius value: " + std::to_string(rX) +
         ". Cur y radiud value: " + std::to_string(rY));
@@ -66,7 +68,7 @@ std::unique_ptr<Curve> CreateEllipse(const double rX, const double rY) {
   return std::make_unique<Ellipse>(rX, rY);
 }
 std::unique_ptr<Curve> CreateHelix(const double r, const double step) {
-  if (r <= 0) {
+  if (std::abs(r) < std::numeric_limits<double>::epsilon() || r < 0) {
     throw std::invalid_argument("Radius must be positive. Cur radius value: " +
                                 std::to_string(r));
   }
