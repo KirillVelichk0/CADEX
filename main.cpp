@@ -20,6 +20,9 @@ int main(int argc, char *argv[]) {
     }
   }
   std::vector<std::shared_ptr<Curve>> curves(N);
+  // I fulfill point 2. I generate random elements using omp to improve
+  // performance and save them to a pre-allocated array. After for, using a
+  // barrier, I wait for all threads to complete generation
 #pragma omp parallel
   {
 #pragma omp for
@@ -51,6 +54,8 @@ int main(int argc, char *argv[]) {
     }
 #pragma omp barrier
   }
+  // Fulfill 3 point. I print without omp, because it is i want save order
+  // and it also critical section
   for (auto &curve : curves) {
     auto [x, y, z] = curve->GetPointByT(M_PI_4);
     auto [derivX, derivY, derivZ] = curve->GetFirstDerivative();
@@ -62,6 +67,7 @@ int main(int argc, char *argv[]) {
               << ", first derivative point value is: " << derivXVal << ":"
               << derivYVal << ":" << derivZVal << std::endl;
   }
+  // Fulfill point 4. I use dynamic_pointer_cast to get Circle objects
   std::vector<std::shared_ptr<Circle>> circles;
 
 #pragma omp parallel
@@ -80,9 +86,12 @@ int main(int argc, char *argv[]) {
     }
 #pragma omp barrier
   }
-  //! Just use C++ 17 feature
+  //! Just use C++ 17 feature fot 5 point
   std::sort(std::execution::par_unseq, circles.begin(), circles.end(),
             [](auto l, auto r) { return l->GetR() < r->GetR(); });
+  // Fulfill 6 point. Use omp for sum calculating. Also i can use
+  // std::accumulate() with std::execution::par for another way to solve this
+  // task
   double sum = 0;
 #pragma omp parallel reduction(+ : sum)
   {
